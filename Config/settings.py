@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'seeder',
+    'extra_settings',
     'django_celery_results',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -118,3 +119,4 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+SMMS_TOKEN = os.environ.get('SMMS_TOKEN', None)

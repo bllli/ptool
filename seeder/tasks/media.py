@@ -7,6 +7,8 @@ from seeder.models import Task, Media
 from Config import app as celery_app
 import subprocess
 
+from seeder.upload_image import upload_image
+
 
 def call_subprocess(command: str) -> Tuple[str, Optional[Exception]]:
     try:
@@ -68,7 +70,12 @@ def gen_medias(task_id):
                     ))
                     shot_paths.append(shot_path)
                 media.screenshot = shot_paths
-                # todo 上传到图床
+                media.save()  # 这儿先存一下？ 好像也没必要 反正都会重新截图生成
+                # 上传到图床
+                urls = [upload_image(path) for path in shot_paths]
+                media.screenshot_bbcode = '\n'.join(map(lambda x: f'[img]{x}[/img]', urls))
+                # 删了吧 占地方
+                check_error(call_subprocess(f'rm tmp/{task_id}-{media.id}-*.jpg'))
         else:
             media.status = Media.Status.not_exists
         media.save()
