@@ -9,6 +9,7 @@ from django.template.response import SimpleTemplateResponse
 
 from Config import app as celery_app
 from seeder.oss.smms import SMMSClient
+from seeder.oss.thumbsnap import ThumbSnapClient
 from seeder.tasks.media import gen_medias
 
 
@@ -18,6 +19,8 @@ def index(request):
     # smms = SMMSClient()
     # smms.profile()
     # smms.upload('tmp/1-0-2.jpg')
+    # c = ThumbSnapClient()
+    # c.upload('tmp/1-0-2.jpg')
     gen_medias(1)
     print(2)
     return SimpleTemplateResponse('index.html')

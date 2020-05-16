@@ -39,4 +39,4 @@ class SMMSClient:
                     return data['images']
                 raise ConnectionError('图片上传失败!! json:' + str(resp.json()))
             pprint(data)
-            return data['url']
+            return data['data']['url']

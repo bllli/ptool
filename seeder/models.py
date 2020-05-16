@@ -29,6 +29,7 @@ class FilePath(models.Model):
         checked = 2
         empty = 3
         not_exists = 4
+
     path = models.CharField('文件绝对路径', max_length=10000, blank=True, null=True)
     status = models.IntegerField('路径检测状态', choices=Status.choices, default=Status.init)
 
@@ -48,13 +49,16 @@ class Media(models.Model):
         working = 5
         failed = 8
         generated = 9
+
     path = models.CharField('文件绝对路径', max_length=10000, blank=True, null=True)
     status = models.IntegerField('状态', choices=Status.choices, default=Status.init)
 
     celery_task_id = models.IntegerField(blank=True, null=True)
     media_info = models.TextField('nfo', null=True, blank=True)
 
+    using_oss = models.CharField('使用图床', max_length=100, default='THUMBSNAP')
     screenshot = JSONField('生成截图的绝对路径 [path, path]', blank=True, null=True)
+    screenshot_task = models.CharField('celery task', max_length=36, blank=True, null=True)
     screenshot_bbcode = models.TextField(blank=True, null=True)
 
     task = models.ForeignKey(to=Task, to_field='id', related_name='media', on_delete=models.CASCADE)
@@ -65,6 +69,7 @@ class WebSite(models.Model):
         init = 1
         working = 5
         generated = 9
+
     url = models.URLField('链接')
     celery_task_id = models.IntegerField(blank=True, null=True)
     bbcode = models.TextField('生成结果', null=True, blank=True)

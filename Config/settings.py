@@ -120,3 +120,4 @@ STATIC_URL = '/static/'
 
 
 SMMS_TOKEN = os.environ.get('SMMS_TOKEN', None)
+THUMBSNAP_TOKEN = os.environ.get('THUMBSNAP_TOKEN', None)
