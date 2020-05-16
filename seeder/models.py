@@ -24,8 +24,13 @@ class Task(models.Model):
 
 
 class FilePath(models.Model):
-    # path = models.FilePathField(path=os.path.join(settings.BASE_DIR, 'tmp'), max_length=1000)
-    path = models.FilePathField(path=os.path.join(settings.BASE_DIR, 'tmp'), max_length=1000)
+    class Status(models.IntegerChoices):
+        init = 1
+        checked = 2
+        empty = 3
+        not_exists = 4
+    path = models.CharField('文件绝对路径', max_length=10000, blank=True, null=True)
+    status = models.IntegerField('路径检测状态', choices=Status.choices, default=Status.init)
 
     task = models.ForeignKey(to=Task, to_field='id', related_name='path', on_delete=models.CASCADE)
 
@@ -39,16 +44,18 @@ class FilePath(models.Model):
 class Media(models.Model):
     class Status(models.IntegerChoices):
         init = 1
+        not_exists = 4
         working = 5
+        failed = 8
         generated = 9
-    path = models.FilePathField(path=os.path.join(settings.BASE_DIR, 'tmp'), max_length=1000)
-    status = models.IntegerField('', choices=Status.choices, default=Status.init)
+    path = models.CharField('文件绝对路径', max_length=10000, blank=True, null=True)
+    status = models.IntegerField('状态', choices=Status.choices, default=Status.init)
 
     celery_task_id = models.IntegerField(blank=True, null=True)
     media_info = models.TextField('nfo', null=True, blank=True)
 
-    screenshot = models.FilePathField(path=os.path.join(settings.BASE_DIR, 'tmp'), null=True, blank=True)
-    screenshot_bbcode = models.TextField()
+    screenshot = JSONField('生成截图的绝对路径 [path, path]', blank=True, null=True)
+    screenshot_bbcode = models.TextField(blank=True, null=True)
 
     task = models.ForeignKey(to=Task, to_field='id', related_name='media', on_delete=models.CASCADE)
 

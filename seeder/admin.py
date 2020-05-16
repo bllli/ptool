@@ -1,5 +1,8 @@
 from django.contrib import admin
 
+from django.db import models
+from django.forms import ClearableFileInput, PasswordInput
+
 from .models import FilePath, Task, WebSite, Media
 
 
@@ -16,11 +19,18 @@ class WebSiteInline(admin.StackedInline):
     readonly_fields = ('status',)
 
 
+# class RichTextEditorWidget(object):
+#     pass
+
+
 class MediaInline(admin.StackedInline):
     model = Media
     extra = 0
     exclude = ('celery_task_id',)
     readonly_fields = ('status', 'media_info')
+    formfield_overrides = {
+        models.FilePathField: {'widget': ClearableFileInput},
+    }
 
 
 @admin.register(Task)
