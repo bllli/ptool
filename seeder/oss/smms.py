@@ -2,11 +2,11 @@ import time
 from pprint import pprint
 
 import requests
-from django.conf import settings
+from constance import config
 
 
 def get_token():
-    return settings.SMMS_TOKEN
+    return config.SMMS_TOKEN
 
 
 class SMMSClient:

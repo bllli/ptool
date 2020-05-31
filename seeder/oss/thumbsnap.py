@@ -3,12 +3,12 @@ import time
 from pprint import pprint
 
 import requests
-from django.conf import settings
+from constance import config
 
 
 class ThumbSnapClient:
     def __init__(self):
-        self.token = settings.THUMBSNAP_TOKEN
+        self.token = config.THUMBSNAP_TOKEN
         self.base_url = 'https://thumbsnap.com/api/'
 
     def _post(self, url, files=None):
@@ -30,7 +30,7 @@ class ThumbSnapClient:
             except Exception as e:
                 raise Exception(resp.content)
             print('upload', file_path, 'spend:', time.time() - start)
-            pprint(data)
+            # pprint(data)
             if not data['success']:
                 raise Exception(json.dumps(data))
             return data['data']['media']

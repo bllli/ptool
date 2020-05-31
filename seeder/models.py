@@ -1,54 +1,144 @@
 import os
 from django.db import models
+from django.db.models.signals import post_save, m2m_changed
 from jsonfield import JSONField
+from filebrowser.fields import FileBrowseField
 
 from Config import settings
-
-
-class KV(models.Model):
-    key = models.CharField(max_length=255, primary_key=True)
-    value = models.TextField(default='')
 
 
 class Task(models.Model):
     class Status(models.IntegerChoices):
         init = 1
+        working = 2
+        failed = 8
+        ok = 7
         published = 9
+
+    class Type(models.IntegerChoices):
+        Movies电影 = 401
+        Documentaries动漫 = 404
+        Animations动画 = 405
+        TVSeries电视剧 = 402
+        TVShows综艺 = 403
+        MusicVideosMV = 406
+        Sports体育 = 407
+        Misc其他 = 409
+        HQAudio音轨 = 408
 
     name = models.CharField('任务名称', max_length=255, default='新任务')
     status = models.IntegerField('任务状态', choices=Status.choices, default=Status.init)
-    desc = models.TextField('最终生成的简介', null=True, blank=True)
+    pt_id = models.IntegerField('PT站生成的种子id', null=True, blank=True)
+    # desc = models.TextField('最终生成的简介', null=True, blank=True)
+    title = models.CharField('标题 要求规范填写，推荐英文', max_length=1000, null=False, blank=False)
+    sub_title = models.CharField('副标题', max_length=1000, null=True, blank=True)
+    douban_url = models.URLField('豆瓣链接', null=True, blank=True)
+    imdb_url = models.URLField('IMDB链接', null=True, blank=True)
+    nfo = models.TextField('nfo信息', null=True, blank=True)
+    image_urls = models.TextField('自动生成的图片', null=True, blank=True)
+    other_bbcode = models.TextField('其他信息 格式为bbcode', null=True, blank=True)
+    type = models.IntegerField('种子类型', choices=Type.choices, null=True, blank=False)
+
+    medium = models.IntegerField('媒介', choices=[
+        (1, 'Blu-ray'),
+        (2, 'HD DVD'),
+        (3, 'Remux'),
+        (4, 'MiniBD'),
+        (5, 'HDTV'),
+        (6, 'DVDR'),
+        (7, 'Encode'),
+        (8, 'CD'),
+        (9, 'UHD Blu-ray'),
+        (10, 'SACD'),
+        (11, 'WEB-DL'),
+    ], null=True, blank=True)
+
+    codec = models.IntegerField('', choices=[
+        (1, 'H.264'),
+        (2, 'VC-1'),
+        (3, 'Xvid'),
+        (4, 'MPEG-2'),
+        (5, 'Other'),
+        (10, 'HEVC'),
+        (11, 'x265'),
+        (12, 'x264'),
+    ], null=True, blank=True)
+
+    audiocodec = models.IntegerField('音频编码', choices=[
+        (1, 'FLAC'),
+        (2, 'APE'),
+        (3, 'DTS'),
+        (4, 'MP3'),
+        (5, 'OGG'),
+        (6, 'AAC'),
+        (7, 'Other'),
+    ], null=True, blank=True)
+
+    standard = models.IntegerField('分辨率', choices=[
+        (1, '4K/2160p'),
+        (2, '2K/1080p'),
+        (3, '1080i'),
+        (4, '720p'),
+        (5, 'SD')
+    ], null=True, blank=True)
 
     def __str__(self):
         return f'<Task: {self.id} - {self.name}>'
+
+    def check_path_status(self, fun, scope=any):
+        return scope(filter(fun, self.path.all()))
+
+    def check_media_status(self, fun, scope=any):
+        return scope(filter(fun, self.media.all()))
+
+    def get_path_status_text(self):
+        return [FilePath.Status(path.status).name for path in self.path.all()]
+
+    def get_media_status_text(self):
+        return [Media.Status(media.status).name for media in self.media.all()]
+
+    def update_status(self):
+        if self.check_media_status(lambda x: x.status == Media.Status.failed) or \
+                self.check_path_status(lambda x: x.status == FilePath.Status.no_media):
+            self.status = self.Status.failed
+        elif self.check_media_status(lambda x: x.status != Media.Status.ok, all) and \
+                self.check_path_status(lambda x: x.status == FilePath.Status.ok, all):
+            self.status = self.Status.ok
+        self.save()
+
+    def on_update_path(self):
+        print('on_update_path')
+        self.task_update()
+
+    def task_update(self):
+        print('update')
 
 
 class FilePath(models.Model):
     class Status(models.IntegerChoices):
         init = 1
-        checked = 2
-        empty = 3
-        not_exists = 4
+        no_exists = 8
+        ok = 9
 
-    path = models.CharField('文件绝对路径', max_length=10000, blank=True, null=True)
+    path = FileBrowseField("文件", max_length=200, directory="", blank=True)
     status = models.IntegerField('路径检测状态', choices=Status.choices, default=Status.init)
 
     task = models.ForeignKey(to=Task, to_field='id', related_name='path', on_delete=models.CASCADE)
 
-    def exists(self):
-        return os.path.exists(self.path)
+    def mark_updated(self):
+        self.status = self.Status.init
+        self.save()
 
     def __str__(self):
-        return f'做种文件/文件夹路径: {self.id} - 属于任务 {self.task_id}'
+        return f'{self.id}: {self.path}'
 
 
 class Media(models.Model):
     class Status(models.IntegerChoices):
         init = 1
-        not_exists = 4
         working = 5
         failed = 8
-        generated = 9
+        ok = 9
 
     path = models.CharField('文件绝对路径', max_length=10000, blank=True, null=True)
     status = models.IntegerField('状态', choices=Status.choices, default=Status.init)
@@ -64,15 +154,22 @@ class Media(models.Model):
     task = models.ForeignKey(to=Task, to_field='id', related_name='media', on_delete=models.CASCADE)
 
 
-class WebSite(models.Model):
-    class Status(models.IntegerChoices):
-        init = 1
-        working = 5
-        generated = 9
+# class WebSite(models.Model):
+#     class Status(models.IntegerChoices):
+#         init = 1
+#         working = 5
+#         generated = 9
+#
+#     url = models.URLField('链接')
+#     celery_task_id = models.IntegerField(blank=True, null=True)
+#     bbcode = models.TextField('生成结果', null=True, blank=True)
+#     status = models.IntegerField('状态', choices=Status.choices, default=Status.init)
+#
+#     task = models.ForeignKey(to=Task, to_field='id', related_name='website', on_delete=models.CASCADE)
 
-    url = models.URLField('链接')
-    celery_task_id = models.IntegerField(blank=True, null=True)
-    bbcode = models.TextField('生成结果', null=True, blank=True)
-    status = models.IntegerField('状态', choices=Status.choices, default=Status.init)
 
-    task = models.ForeignKey(to=Task, to_field='id', related_name='website', on_delete=models.CASCADE)
+from .signals import task_post_save, task_post_m2m_changed
+
+post_save.connect(task_post_save, sender=Task)
+# m2m_changed.connect(task_post_m2m_changed, sender=FilePath.task)
+

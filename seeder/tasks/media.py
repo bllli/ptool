@@ -82,7 +82,7 @@ def gen_medias(task_id):
                 media.screenshot_task = screenshot_task.id
             media.save()
         else:
-            media.status = Media.Status.not_exists
+            media.status = Media.Status.failed
             media.save()
     pass
 
@@ -98,7 +98,8 @@ def upload_media_screenshot(media_id, using='THUMBSNAP'):
     client = OSS_CLIENT.get(using)
     c = client()
     media = Media.objects.get(id=media_id)
-    code = '\n'.join([f'[img]{c.upload(path)}[/img]' for path in media.screenshot])
+    # code = '\n'.join([f'[img]{c.upload(path)}[/img]' for path in media.screenshot])
+    code = '\n'.join([f'{c.upload(path)}' for path in media.screenshot])
     media.screenshot_bbcode = code
-    media.status = Media.Status.generated
+    media.status = Media.Status.ok
     media.save()

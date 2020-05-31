@@ -33,12 +33,16 @@ INSTALLED_APPS = [
     'seeder',
     'extra_settings',
     'django_celery_results',
+    'grappelli',
+    'filebrowser',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'constance',
+    'constance.backends.database',
 ]
 
 MIDDLEWARE = [
@@ -117,7 +121,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = 'tmp/static/'
 
 SMMS_TOKEN = os.environ.get('SMMS_TOKEN', None)
 THUMBSNAP_TOKEN = os.environ.get('THUMBSNAP_TOKEN', None)
+
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    'SMMS_TOKEN': ('', 'sm.ms 图床token'),
+    'THUMBSNAP_TOKEN': ('', 'thumbsnap 图床token'),
+    'PT_COOKIES': ('', 'pt站登录cookies'),
+}

@@ -5,8 +5,8 @@ from django.conf import settings
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Config.settings')
 
-broker_url = 'sqla+sqlite:///' + os.path.join(settings.BASE_DIR, 'db.sqlite3')
-app = Celery('proj', broker=broker_url, backend='db+sqlite:///' + os.path.join(settings.BASE_DIR, 'db.sqlite3'))
+broker_url = 'sqla+sqlite:///' + os.path.join(settings.BASE_DIR, 'celery.sqlite3')
+app = Celery('proj', broker=broker_url, backend='db+sqlite:///' + os.path.join(settings.BASE_DIR, 'celery.sqlite3'))
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
