@@ -31,7 +31,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'seeder',
-    'extra_settings',
     'django_celery_results',
     'grappelli',
     'filebrowser',
@@ -133,4 +132,6 @@ CONSTANCE_CONFIG = {
     'SMMS_TOKEN': ('', 'sm.ms 图床token'),
     'THUMBSNAP_TOKEN': ('', 'thumbsnap 图床token'),
     'PT_COOKIES': ('', 'pt站登录cookies'),
+    'PT_SITE': ('https://test.haidan.video/', 'PT站'),
+    'Tracker': ('https://test.haidan.video/announce.php', 'PT站Tracker地址'),
 }

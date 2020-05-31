@@ -95,11 +95,18 @@ OSS_CLIENT = {
 
 @celery_app.task()
 def upload_media_screenshot(media_id, using='THUMBSNAP'):
-    client = OSS_CLIENT.get(using)
-    c = client()
     media = Media.objects.get(id=media_id)
-    # code = '\n'.join([f'[img]{c.upload(path)}[/img]' for path in media.screenshot])
-    code = '\n'.join([f'{c.upload(path)}' for path in media.screenshot])
-    media.screenshot_bbcode = code
-    media.status = Media.Status.ok
-    media.save()
+    try:
+        client = OSS_CLIENT.get(using)
+        c = client()
+        # code = '\n'.join([f'[img]{c.upload(path)}[/img]' for path in media.screenshot])
+        code = '\n'.join([f'{c.upload(path)}' for path in media.screenshot])
+        media.screenshot_bbcode = code
+        media.status = Media.Status.ok
+        media.save()
+        from seeder.tasks.task import check_task
+        check_task.delay(media.task_id)
+    except Exception as e:
+        media.status = Media.Status.failed
+        media.message = '上传过程出错:' + str(e)
+        media.save()

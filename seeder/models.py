@@ -1,6 +1,6 @@
 import os
 from django.db import models
-from django.db.models.signals import post_save, m2m_changed
+from django.db.models.signals import post_save, m2m_changed, pre_save
 from jsonfield import JSONField
 from filebrowser.fields import FileBrowseField
 
@@ -11,6 +11,7 @@ class Task(models.Model):
     class Status(models.IntegerChoices):
         init = 1
         working = 2
+        path_modified = 6
         failed = 8
         ok = 7
         published = 9
@@ -28,6 +29,7 @@ class Task(models.Model):
 
     name = models.CharField('任务名称', max_length=255, default='新任务')
     status = models.IntegerField('任务状态', choices=Status.choices, default=Status.init)
+    message = models.TextField('任务状态信息', default='', null=True, blank=True)
     pt_id = models.IntegerField('PT站生成的种子id', null=True, blank=True)
     # desc = models.TextField('最终生成的简介', null=True, blank=True)
     title = models.CharField('标题 要求规范填写，推荐英文', max_length=1000, null=False, blank=False)
@@ -53,7 +55,7 @@ class Task(models.Model):
         (11, 'WEB-DL'),
     ], null=True, blank=True)
 
-    codec = models.IntegerField('', choices=[
+    codec = models.IntegerField('编码', choices=[
         (1, 'H.264'),
         (2, 'VC-1'),
         (3, 'Xvid'),
@@ -85,33 +87,11 @@ class Task(models.Model):
     def __str__(self):
         return f'<Task: {self.id} - {self.name}>'
 
-    def check_path_status(self, fun, scope=any):
-        return scope(filter(fun, self.path.all()))
-
-    def check_media_status(self, fun, scope=any):
-        return scope(filter(fun, self.media.all()))
-
     def get_path_status_text(self):
         return [FilePath.Status(path.status).name for path in self.path.all()]
 
     def get_media_status_text(self):
         return [Media.Status(media.status).name for media in self.media.all()]
-
-    def update_status(self):
-        if self.check_media_status(lambda x: x.status == Media.Status.failed) or \
-                self.check_path_status(lambda x: x.status == FilePath.Status.no_media):
-            self.status = self.Status.failed
-        elif self.check_media_status(lambda x: x.status != Media.Status.ok, all) and \
-                self.check_path_status(lambda x: x.status == FilePath.Status.ok, all):
-            self.status = self.Status.ok
-        self.save()
-
-    def on_update_path(self):
-        print('on_update_path')
-        self.task_update()
-
-    def task_update(self):
-        print('update')
 
 
 class FilePath(models.Model):
@@ -125,12 +105,18 @@ class FilePath(models.Model):
 
     task = models.ForeignKey(to=Task, to_field='id', related_name='path', on_delete=models.CASCADE)
 
-    def mark_updated(self):
-        self.status = self.Status.init
-        self.save()
+    @staticmethod
+    def check_status(**kwargs):
+        # print('mark_updated:', self.id)
+        # self.status = self.Status.init
+        # self.save()
+        print(1)
 
     def __str__(self):
         return f'{self.id}: {self.path}'
+
+
+pre_save.connect(FilePath.check_status, sender=FilePath)
 
 
 class Media(models.Model):
@@ -142,6 +128,7 @@ class Media(models.Model):
 
     path = models.CharField('文件绝对路径', max_length=10000, blank=True, null=True)
     status = models.IntegerField('状态', choices=Status.choices, default=Status.init)
+    message = models.TextField('状态信息', default='', blank=True, null=True)
 
     celery_task_id = models.IntegerField(blank=True, null=True)
     media_info = models.TextField('nfo', null=True, blank=True)
@@ -168,8 +155,7 @@ class Media(models.Model):
 #     task = models.ForeignKey(to=Task, to_field='id', related_name='website', on_delete=models.CASCADE)
 
 
-from .signals import task_post_save, task_post_m2m_changed
+from .signals import task_post_save
 
-post_save.connect(task_post_save, sender=Task)
-# m2m_changed.connect(task_post_m2m_changed, sender=FilePath.task)
-
+pre_save.connect(task_post_save, sender=Task)
+# pre_save.connect(path_pre_save, sender=FilePath)

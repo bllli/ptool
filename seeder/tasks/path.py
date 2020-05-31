@@ -43,6 +43,10 @@ def path_to_medias(task_id):
     for media_path in medias_path:
         task.media.create(path=media_path)
 
+    if not medias_path:
+        task.status = Task.Status.failed
+        task.message = '路径中找不到视频文件'
+        task.save()
     from seeder.tasks.media import gen_medias
     gen_medias.delay(task_id)
     pass
