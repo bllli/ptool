@@ -1,5 +1,4 @@
 import os
-import time
 
 from celery import shared_task
 from filetype import filetype
@@ -8,10 +7,7 @@ from seeder.models import Task, FilePath, Media
 from Config import app as celery_app
 
 
-# @celery_app.
-@shared_task
 def path_to_medias(task_id):
-    time.sleep(3)
     print('path_to_medias', task_id)
     task = Task.objects.get(id=task_id)
     path_ms = task.path.all()
@@ -40,13 +36,14 @@ def path_to_medias(task_id):
         path_m.save()
     print(medias_path)
     task.media.all().delete()
-    for media_path in medias_path:
+    for media_path in medias_path[:3]:
         task.media.create(path=media_path)
 
     if not medias_path:
-        task.status = Task.Status.failed
-        task.message = '路径中找不到视频文件'
+        task.status = Task.Status.ok
+        task.message = '路径中找不到视频文件,可以直接发布'
         task.save()
-    from seeder.tasks.media import gen_medias
-    gen_medias.delay(task_id)
-    pass
+    else:
+        task.status = Task.Status.working
+        task.message = '发现视频文件，正在处理'
+        task.save()

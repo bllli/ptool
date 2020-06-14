@@ -11,8 +11,8 @@ def check_task(task_id):
     # media 汇总信息 -> task
     task_medias = task.media.all()
     if not task_medias:
-        task.status = Task.Status.failed
-        task.message = '没有捕获到视频'
+        task.status = Task.Status.ok
+        task.message = '路径中找不到视频文件,可以直接发布'
         task.save()
         return
     all_media_ok = all(map(lambda x: x.status == Media.Status.ok, task_medias))
@@ -21,11 +21,12 @@ def check_task(task_id):
         task.message = '有视频没处理好'
         task.save()
         return
+    generate_torrent_file(task_id)
     task.status = Task.Status.ok
+    task.message = '处理完成'
     task.image_urls = [_.screenshot_bbcode for _ in task_medias]
     task.nfo = task_medias[0].media_info
     task.save()
-    generate_torrent_file(task_id)
 
 
 def generate_torrent_file(task_id):

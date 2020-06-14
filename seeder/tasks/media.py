@@ -24,12 +24,16 @@ def call_subprocess(command: str) -> Tuple[str, Optional[Exception]]:
         return '', e
 
 
-@celery_app.task()
 def gen_medias(task_id):
+    print('gen_medias', task_id)
     task = Task.objects.get(id=task_id)
     medias = task.media.all()
+    if not medias:
+        print('no medias')
+        return
     for media_index, media in enumerate(medias):
-        # print(media.path)
+        print(media.path)
+
         def check_error(result):
             msg, error = result
             if error:
@@ -39,9 +43,9 @@ def gen_medias(task_id):
             return msg
 
         if os.path.isfile(media.path):
-            media_info = check_error(call_subprocess(f'mediainfo {media.path}'))
+            media_info = check_error(call_subprocess(f'mediainfo "{media.path}"'))
             media.media_info = media_info
-            video_info = check_error(call_subprocess(f'ffprobe -hide_banner {media.path}'))
+            video_info = check_error(call_subprocess(f'ffprobe -hide_banner "{media.path}"'))
             import re
             pattern = re.compile(r'Duration: (.*?), start')
             groups = pattern.search(video_info)
@@ -72,7 +76,7 @@ def gen_medias(task_id):
                 for shot_index, t in enumerate(shot_time_text_list):
                     shot_path = f'tmp/{task_id}-{media.id}-{shot_index}.jpg'
                     check_error(call_subprocess(
-                        f'ffmpeg -ss {t} -i {media.path} -f image2 -frames:v 1 -y {shot_path}'
+                        f'ffmpeg -ss {t} -i "{media.path}" -f image2 -frames:v 1 -y {shot_path}'
                     ))
                     shot_paths.append(shot_path)
                 media.screenshot = shot_paths
@@ -80,6 +84,9 @@ def gen_medias(task_id):
                 # 上传到图床
                 screenshot_task = upload_media_screenshot.delay(media.id, media.using_oss)
                 media.screenshot_task = screenshot_task.id
+            else:
+                media.status = Media.Status.failed
+                media.message = 'video_info信息有误： ' + video_info
             media.save()
         else:
             media.status = Media.Status.failed
@@ -95,6 +102,7 @@ OSS_CLIENT = {
 
 @celery_app.task()
 def upload_media_screenshot(media_id, using='THUMBSNAP'):
+    """异步上传"""
     media = Media.objects.get(id=media_id)
     try:
         client = OSS_CLIENT.get(using)
@@ -103,6 +111,7 @@ def upload_media_screenshot(media_id, using='THUMBSNAP'):
         code = '\n'.join([f'{c.upload(path)}' for path in media.screenshot])
         media.screenshot_bbcode = code
         media.status = Media.Status.ok
+        media.message = '图片上传中'
         media.save()
         from seeder.tasks.task import check_task
         check_task.delay(media.task_id)

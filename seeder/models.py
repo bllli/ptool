@@ -29,6 +29,8 @@ class Task(models.Model):
 
     name = models.CharField('任务名称', max_length=255, default='新任务')
     status = models.IntegerField('任务状态', choices=Status.choices, default=Status.init)
+    published = models.BooleanField('已发布', default=False)
+    celery_task = models.CharField('celery task', max_length=36, blank=True, null=True)
     message = models.TextField('任务状态信息', default='', null=True, blank=True)
     pt_id = models.IntegerField('PT站生成的种子id', null=True, blank=True)
     # desc = models.TextField('最终生成的简介', null=True, blank=True)
@@ -116,7 +118,7 @@ class FilePath(models.Model):
         return f'{self.id}: {self.path}'
 
 
-pre_save.connect(FilePath.check_status, sender=FilePath)
+# pre_save.connect(FilePath.check_status, sender=FilePath)
 
 
 class Media(models.Model):
@@ -155,7 +157,7 @@ class Media(models.Model):
 #     task = models.ForeignKey(to=Task, to_field='id', related_name='website', on_delete=models.CASCADE)
 
 
-from .signals import task_post_save
+# from .signals import task_post_save
 
-pre_save.connect(task_post_save, sender=Task)
+# pre_save.connect(task_post_save, sender=Task)
 # pre_save.connect(path_pre_save, sender=FilePath)
