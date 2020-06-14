@@ -111,7 +111,7 @@ def upload_media_screenshot(media_id, using='THUMBSNAP'):
         code = '\n'.join([f'{c.upload(path)}' for path in media.screenshot])
         media.screenshot_bbcode = code
         media.status = Media.Status.ok
-        media.message = '图片上传中'
+        media.message = '图片上传完成'
         media.save()
         from seeder.tasks.task import check_task
         check_task.delay(media.task_id)

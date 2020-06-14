@@ -2,6 +2,9 @@ from django.contrib import admin
 
 from django.db import models
 from django.forms import ClearableFileInput, PasswordInput, BaseInlineFormSet
+from django.utils.html import format_html_join
+from django.utils.safestring import mark_safe
+
 from .tasks import main as main_tasks
 from .models import FilePath, Task, Media
 
@@ -25,11 +28,30 @@ class MediaInline(admin.StackedInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'status', 'published', 'pt_url', 'message')
+    list_display = ('id', 'name', 'title', 'status', 'published', 'pt_url', 'message')
     inlines = (FilePathInline, MediaInline)
     # fields = ['id']
     readonly_fields = ('status', 'image_urls', 'pt_id', 'message', 'nfo', 'published')
     actions = ['build', 'publish']
+
+    def pt_url(self, instance):
+        # assuming get_full_address() returns a list of strings
+        # for each line of the address and you want to separate each
+        # line by a linebreak
+        if instance.pt_id:
+            url = f'https://www.haidan.video/details.php?id={instance.pt_id}&hit=1'
+            return mark_safe(f'<a target="_blank" href={url}>{url}</a>')
+        else:
+            return mark_safe(f"<span>未发布</span>")
+
+        # return format_html_join(
+        #     mark_safe('<br>'),
+        #     '{}',
+        #     ((line,) for line in instance.get_full_address()),
+        # ) or mark_safe("<span class='errors'>I can't determine this address.</span>")
+
+    # short_description functions like a model field's verbose_name
+    pt_url.short_description = "URL"
 
     def build(self, request, queryset):
         """生成"""
@@ -44,13 +66,10 @@ class TaskAdmin(admin.ModelAdmin):
 
     def publish(self, request, queryset):
         """发布"""
-        return 1
-
-    def pt_url(self, model: Task):
-        if model.status == Task.Status.published:
-            return f'https://www.haidan.video/details.php?id={model.pt_id}'
-        else:
-            return ''
+        for task in queryset:
+            if not task.published:
+                # main_tasks.task_publish(task.id)
+                main_tasks.task_publish.delay(task.id)
 
     # def save_form(self, request, form, change):
     #     return super().save_form(request, form, change)

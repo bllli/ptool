@@ -41,10 +41,7 @@ def generate_torrent_file(task_id):
     for path_m in task.path.all():
         file_paths.append(path_m.path.path)
     t.filepaths = file_paths
-    # 这里注意 要先设置filepaths 再赋值name 不然会被覆盖
-    t.name = task.title
+    # t.name = task.title
     t.generate()
-    t.write(f'tmp/{task.title}.torrent', overwrite=True)
+    t.write(f'tmp/{task_id}-{task.title}.torrent', overwrite=True)
     return
-
-    # task 上传 PT站

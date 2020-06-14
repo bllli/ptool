@@ -132,6 +132,6 @@ CONSTANCE_CONFIG = {
     'SMMS_TOKEN': ('', 'sm.ms 图床token'),
     'THUMBSNAP_TOKEN': ('', 'thumbsnap 图床token'),
     'PT_COOKIES': ('', 'pt站登录cookies'),
-    'PT_SITE': ('https://test.haidan.video/', 'PT站'),
-    'Tracker': ('https://test.haidan.video/announce.php', 'PT站Tracker地址'),
+    'PT_SITE': ('https://haidan.video/', 'PT站'),
+    'Tracker': ('https://haidan.video/announce.php', 'PT站Tracker地址'),
 }
