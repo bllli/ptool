@@ -135,3 +135,7 @@ CONSTANCE_CONFIG = {
     'PT_SITE': ('https://haidan.video/', 'PT站'),
     'Tracker': ('https://haidan.video/announce.php', 'PT站Tracker地址'),
 }
+
+ADMINS = [
+    ('admin', 'admin@mysite.com'),
+]

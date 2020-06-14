@@ -140,6 +140,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-/db.sqlite3
-/.idea
-/venv2/
+*.sqlite3
+tmp/
+uploads/
+venv2/
