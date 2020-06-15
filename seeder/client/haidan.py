@@ -38,7 +38,7 @@ class HaiDanClient:
             "small_descr": (None, task_m.sub_title),
             "durl": (None, task_m.douban_url),
             "url": (None, task_m.imdb_url),
-            "preview-pics": (None, task_m.imdb_url),
+            "preview-pics": (None, task_m.image_urls),
             "nfo-string": (None, task_m.nfo),
             "descr": (None, task_m.other_bbcode),
             "type": (None, task_m.type),
@@ -55,14 +55,16 @@ class HaiDanClient:
                 timeout=30,
             )
             # 'https://test.haidan.video/details.php?id=21&uploaded=1'
-            params = {s.split('=')[0]: s.split('=')[1] for s in resp.url.split('?')[-1].split('&')}
-
-            if 'uploaded' in params and 'id' in params:
+            if '&uploaded=1' in resp.url:
+                params = {s.split('=')[0]: s.split('=')[1] for s in resp.url.split('?')[-1].split('&')}
                 task_m.published = True
                 task_m.message = '发布成功'
                 task_m.pt_id = int(params['id'])
             else:
-                task_m.message = '发布失败' + str(resp.content)
+                bs = bs4.BeautifulSoup(resp.content)
+                ps = bs.find_all('p')
+                ps = [p.text.strip() for p in ps if '魔力值' not in p.text and '打卡' not in p.text]
+                task_m.message = '发布失败' + ';'.join(map(str, ps))
         except ConnectionError as e:
             task_m.message = '发布失败' + str(e)
         except Exception as e:

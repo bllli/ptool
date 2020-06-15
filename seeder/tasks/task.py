@@ -24,7 +24,7 @@ def check_task(task_id):
     generate_torrent_file(task_id)
     task.status = Task.Status.ok
     task.message = '处理完成'
-    task.image_urls = [_.screenshot_bbcode for _ in task_medias]
+    task.image_urls = '\n'.join([_.screenshot_bbcode for _ in task_medias])
     task.nfo = task_medias[0].media_info
     task.save()
 

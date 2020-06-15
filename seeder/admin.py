@@ -31,7 +31,7 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'title', 'status', 'published', 'pt_url', 'message')
     inlines = (FilePathInline, MediaInline)
     # fields = ['id']
-    readonly_fields = ('status', 'image_urls', 'pt_id', 'message', 'nfo', 'published')
+    readonly_fields = ('status', 'image_urls', 'pt_id', 'message', 'nfo', 'published', 'celery_task')
     actions = ['build', 'publish']
 
     def pt_url(self, instance):
