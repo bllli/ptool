@@ -58,10 +58,10 @@ def gen_medias(task_id):
                     shot_num = 2
                 else:
                     shot_num = 4
-                offset_seconds = 20
-                if seconds < 20:
+                offset_seconds = 180
+                if seconds < 180:
                     shot_num = 1
-                    offset_seconds = 10
+                    offset_seconds = 0
                 time_delta_pre_shot = seconds // shot_num
                 if time_delta_pre_shot < 10:  # 省的越界
                     offset_seconds = 0
@@ -108,7 +108,7 @@ def upload_media_screenshot(media_id, using='THUMBSNAP'):
         client = OSS_CLIENT.get(using)
         c = client()
         # code = '\n'.join([f'[img]{c.upload(path)}[/img]' for path in media.screenshot])
-        code = '\n\n'.join([f'{c.upload(path)}' for path in media.screenshot])
+        code = '\r\n'.join([f'{c.upload(path)}' for path in media.screenshot])
         media.screenshot_bbcode = code
         media.status = Media.Status.ok
         media.message = '图片上传完成'

@@ -1,4 +1,6 @@
-FROM python:3.8-buster
+FROM python:3.8-slim
+
+ENV COLUMNS 80
 
 RUN echo \
     deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free\
@@ -7,15 +9,17 @@ RUN echo \
     deb https://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free\
     > /etc/apt/sources.list
 
-RUN apt-get update \
-    && apt-get -y install ffmpeg \
-    && apt-get -y install mediainfo
+RUN apt-get update && apt-get -y install ffmpeg mediainfo supervisor
 
 COPY requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
     && rm -rf ~/.cache
 
-COPY ./ /
+ADD ./supervisor/supervisord.conf /etc/supervisord.conf
 
-ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
+COPY ./ /app
+
+RUN mkdir -p /app/tmp
+
+CMD ["/usr/bin/supervisord"]
