@@ -16,10 +16,10 @@ COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
     && rm -rf ~/.cache
 
+RUN mkdir -p /app/tmp && mkdir -p /ptools/db && mkdir -p /ptools/log
+
 ADD ./supervisor/supervisord.conf /etc/supervisord.conf
 
 COPY ./ /app
-
-RUN mkdir -p /app/tmp
 
 CMD ["/usr/bin/supervisord"]

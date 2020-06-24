@@ -41,7 +41,7 @@ class Task(models.Model):
     nfo = models.TextField('nfo信息', null=True, blank=True)
     image_urls = models.TextField('自动生成的图片', null=True, blank=True)
     other_bbcode = models.TextField('其他信息 格式为bbcode', null=True, blank=True)
-    type = models.IntegerField('种子类型', choices=Type.choices, null=True, blank=False)
+    type = models.IntegerField('种子类型', choices=Type.choices, null=True, blank=False, default=401)
 
     medium = models.IntegerField('媒介', choices=[
         (1, 'Blu-ray'),
@@ -55,7 +55,7 @@ class Task(models.Model):
         (9, 'UHD Blu-ray'),
         (10, 'SACD'),
         (11, 'WEB-DL'),
-    ], null=True, blank=True)
+    ], null=True, blank=True, default=7)
 
     codec = models.IntegerField('编码', choices=[
         (1, 'H.264'),
@@ -66,7 +66,7 @@ class Task(models.Model):
         (10, 'HEVC'),
         (11, 'x265'),
         (12, 'x264'),
-    ], null=True, blank=True)
+    ], null=True, blank=True, default=12)
 
     audiocodec = models.IntegerField('音频编码', choices=[
         (1, 'FLAC'),
@@ -76,7 +76,7 @@ class Task(models.Model):
         (5, 'OGG'),
         (6, 'AAC'),
         (7, 'Other'),
-    ], null=True, blank=True)
+    ], null=True, blank=True, default=3)
 
     standard = models.IntegerField('分辨率', choices=[
         (1, '4K/2160p'),
@@ -84,7 +84,7 @@ class Task(models.Model):
         (3, '1080i'),
         (4, '720p'),
         (5, 'SD')
-    ], null=True, blank=True)
+    ], null=True, blank=True, default=2)
 
     def __str__(self):
         return f'<Task: {self.id} - {self.name}>'

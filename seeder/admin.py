@@ -70,6 +70,8 @@ class TaskAdmin(admin.ModelAdmin):
             if not task.published:
                 # main_tasks.task_publish(task.id)
                 main_tasks.task_publish.delay(task.id)
+                task.message = '正在发布!'
+                task.save()
 
     # def save_form(self, request, form, change):
     #     return super().save_form(request, form, change)
