@@ -9,7 +9,6 @@ import subprocess
 
 from seeder.oss.smms import SMMSClient
 from seeder.oss.thumbsnap import ThumbSnapClient
-from seeder.upload_image import upload_image
 
 
 def call_subprocess(command: str) -> Tuple[str, Optional[Exception]]:
@@ -118,4 +117,7 @@ def upload_media_screenshot(media_id, using='THUMBSNAP'):
     except Exception as e:
         media.status = Media.Status.failed
         media.message = '上传过程出错:' + str(e)
+        media.task.status = Task.Status.failed
+        media.task.message = '图片' + media.message
+        media.task.save()
         media.save()

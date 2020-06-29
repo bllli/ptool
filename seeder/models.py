@@ -35,6 +35,7 @@ class Task(models.Model):
     pt_id = models.IntegerField('PT站生成的种子id', null=True, blank=True)
     # desc = models.TextField('最终生成的简介', null=True, blank=True)
     title = models.CharField('标题 要求规范填写，推荐英文', max_length=1000, null=False, blank=False)
+    team_suffix = models.CharField('制作组后缀,必填', max_length=20, null=False, blank=False)
     sub_title = models.CharField('副标题', max_length=1000, null=True, blank=True)
     douban_url = models.URLField('豆瓣链接', null=True, blank=True)
     imdb_url = models.URLField('IMDB链接', null=True, blank=True)

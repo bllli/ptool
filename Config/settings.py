@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+
+if os.environ.get('env') == 'docker':
+    from .ENV_DOCKER import *
+else:
+    from .ENV_LOCAL import *
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -81,7 +87,7 @@ WSGI_APPLICATION = 'Config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/ptools/db/db.sqlite3',
+        'NAME': database_path,
     }
 }
 

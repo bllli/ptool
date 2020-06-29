@@ -1,4 +1,6 @@
 """海胆PT站Client"""
+import traceback
+
 import bs4 as bs4
 import requests
 
@@ -12,11 +14,7 @@ class HaiDanClient:
         self.upload_url = 'https://haidan.video/takeupload.php'
         # self.url_user_details = 'userdetails.php'  # '?id={id}'
         self.header = {}
-        c = config.PT_COOKIES
-        try:
-            self.cookies = {_[0]: _[1] for _ in [_.strip().split('=') for _ in c.split(';')]}
-        except Exception as e:
-            raise Exception('cookies 格式有问题')
+        self.cookies = None
 
     def _get(self, url, params):
         return requests.get(
@@ -46,8 +44,14 @@ class HaiDanClient:
             "codec_sel": (None, task_m.codec),
             "audiocodec_sel": (None, task_m.audiocodec),
             "standard_sel": (None, task_m.standard),
+            "team_suffix": (None, task_m.team_suffix),
         }
         try:
+            c = config.PT_COOKIES
+            try:
+                self.cookies = {_[0]: _[1] for _ in [_.strip().split('=') for _ in c.split(';')]}
+            except Exception as e:
+                raise Exception('cookies 格式有问题')
             resp = requests.post(
                 url=self.upload_url,
                 cookies=self.cookies,
@@ -59,46 +63,18 @@ class HaiDanClient:
                 params = {s.split('=')[0]: s.split('=')[1] for s in resp.url.split('?')[-1].split('&')}
                 task_m.published = True
                 task_m.message = '发布成功'
-                task_m.pt_id = int(params['id'])
+                task_m.pt_id = int(params['torrent_id'])
             else:
                 bs = bs4.BeautifulSoup(resp.content)
                 ps = bs.find_all('p')
                 ps = [p.text.strip() for p in ps if '魔力值' not in p.text and '打卡' not in p.text]
                 task_m.message = '发布失败' + ';'.join(map(str, ps))
         except ConnectionError as e:
-            task_m.message = '发布失败' + str(e)
+            task_m.message = '发布失败' + traceback.format_exc()
         except Exception as e:
-            task_m.message = '发布失败' + str(e)
+            task_m.message = '发布失败' + traceback.format_exc()
         task_m.save()
-
-    def upload_demo(self):
-        params = {
-            "file": ('1111.torrent', open('../../tmp/1111.torrent', 'rb').read()),
-            "name": (None, '标题'),
-            "small_descr": (None, '副标题'),
-            "durl": (None, 'https://movie.douban.com/subject/33442331/'),
-            "url": (None, 'http://www.imdb.com/title/tt12026744'),
-            "preview-pics": (None, """https://thumbsnap.com/i/xefGa4oN.jpg
-https://thumbsnap.com/i/sdCVBYzg.jpg
-https://thumbsnap.com/i/PpCsWTMr.jpg
-https://thumbsnap.com/i/PRGCUBjJ.jpg"""),
-            "nfo-string": (None, """Unique ID : 182701576509801358962588017462883533822"""),
-            "descr": (None, "其他描述"),
-            "type": (None, 401),
-            "medium_sel": (None, 1),
-            "codec_sel": (None, 1),
-            "audiocodec_sel": (None, 1),
-            "standard_sel": (None, 1),
-        }
-        resp = requests.post(
-            url=self.upload_url,
-            cookies=self.cookies,
-            files=params
-        )
-        print(1)
 
 
 if __name__ == '__main__':
     c = HaiDanClient()
-    # if c.check():
-    print(c.upload_demo())
