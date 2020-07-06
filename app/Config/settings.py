@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
+import random
+import string
 
 if os.environ.get('env') == 'docker':
     from .ENV_DOCKER import *
@@ -25,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'qyxh&eq&&qrdn+t8=m$c)o)kli&c6si_!$)ihu98!8&-w9titw'
+SECRET_KEY = os.environ.get('SECRET_KEY') or ''.join(random.choices(string.ascii_letters, k=100))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -126,7 +127,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = 'tmp/static/'
+STATIC_ROOT = '/tmp/static/'
 
 SMMS_TOKEN = os.environ.get('SMMS_TOKEN', None)
 THUMBSNAP_TOKEN = os.environ.get('THUMBSNAP_TOKEN', None)

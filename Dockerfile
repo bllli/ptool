@@ -20,8 +20,10 @@ RUN mkdir -p /app/tmp && mkdir -p /ptools/db && mkdir -p /ptools/log
 
 ADD ./supervisor/supervisord.conf /etc/supervisord.conf
 
+COPY ./supervisor/conf /supervisor
+
 ENV env docker
 
-COPY ./ /app
+COPY ./app /app
 
 CMD ["/usr/bin/supervisord"]
