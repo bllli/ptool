@@ -37,7 +37,7 @@
                             label="状态">
                     </el-table-column>
                     <el-table-column label="操作">
-                        <template slot="header" slot-scope="">
+                        <template slot="header" slot-scope="{}">
                             <el-button
                                     size="mini"
                                     type="danger"
@@ -87,23 +87,21 @@
                     this.app_status[row_index].restarting = true
                     message = `${app_name}服务重启完成`
                 } else {
-                    console.log(this.all_app_restarting)
                     this.all_app_restarting = true
-                    console.log(this.all_app_restarting)
                 }
-                // restartApp(app_name).then(() => {
-                //     this.$notify({
-                //         title: '提示',
-                //         message: message,
-                //         duration: 0
-                //     });
-                //     if (row_index !== undefined) {
-                //         this.app_status[row_index].restarting = false
-                //     } else {
-                //         this.all_app_restarting = false
-                //     }
-                //     this.updateAppStatus()
-                // })
+                restartApp(app_name).then(() => {
+                    this.$notify({
+                        title: '提示',
+                        message: message,
+                        duration: 0
+                    });
+                    if (row_index !== undefined) {
+                        this.app_status[row_index].restarting = false
+                    } else {
+                        this.all_app_restarting = false
+                    }
+                    this.updateAppStatus()
+                })
             },
             updateAppVersion: function () {
                 getAppVersion().then(resp => {
