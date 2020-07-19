@@ -10,6 +10,17 @@ def check_info():
     }
 
 
+def restart_app(process):
+    client = ServerProxy('http://{}:{}/RPC2'.format('127.0.0.1', 9001))
+    if not process:
+        processes = ['django', 'celery']
+    else:
+        processes = [process]
+    for process in processes:
+        client.supervisor.stopProcess(process)
+        client.supervisor.startProcess(process)
+
+
 if __name__ == '__main__':
 
     # check_django()

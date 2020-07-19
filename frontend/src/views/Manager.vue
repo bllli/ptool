@@ -11,10 +11,10 @@
                 {{ version }}
             </div>
         </el-card>
-
+        <el-divider></el-divider>
         <el-card class="box-card">
             <div slot="header" class="clearfix">
-                <span>服务状态</span>
+                <span>服务状态 Status</span>
                 <el-button style="float: right; padding: 3px 0" type="text" v-on:click="updateAppStatus">刷新</el-button>
             </div>
             <div>
@@ -57,6 +57,45 @@
                 </el-table>
             </div>
         </el-card>
+        <el-divider></el-divider>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>版本更新 Update</span>
+                <el-button style="float: right; padding: 3px 0" type="text" v-on:click="updateAppVersion">刷新</el-button>
+            </div>
+            <div>
+                <div v-if="upload_pack_md5">
+                    服务器上发现了安装包 <br/>
+                    md5值： {{upload_pack_md5}} <br/>
+                    请确认完全信赖安装包来源，并确认md5值匹配 <br/>
+                    <el-button
+                            size="huge"
+                            type="danger"
+                            v-bind:loading="updating"
+                            @click="updateConfirm()">确认安装更新
+                    </el-button>
+                    <el-divider></el-divider>
+                    当然也可以重新上传安装包
+                </div>
+                <div v-else>
+                    服务器上没有安装包，请先上传
+                </div>
+                <el-upload
+                        class="upload-demo"
+                        drag
+                        action="http://127.0.0.1:8080/manager/update/upload"
+                        :show-file-list=false
+                        accept="application/zip"
+                        :on-success="reloadUpdateFileInfo"
+                >
+                    <i class="el-icon-upload"></i>
+                    <div class="el-upload__text">将安装包拖到此处，或<em>点击上传</em><br/>请务必上传从官方渠道获取的安装包</div>
+                    <div class="el-upload__tip" slot="tip">多次上传时，以最后一个文件为准</div>
+                </el-upload>
+
+            </div>
+        </el-card>
+
         <el-row>
             <div class="text-wrapper">
             </div>
@@ -65,7 +104,7 @@
 </template>
 
 <script>
-    import {getAppStatus, getAppVersion, restartApp} from '@/api/manager'
+    import {getAppStatus, getAppVersion, restartApp, updateFileInfo, updateConfirm} from '@/api/manager'
 
     export default {
         name: "Manager",
@@ -74,13 +113,29 @@
                 version: "123",
                 app_status: [],
                 all_app_restarting: false,
+                updating: false,
+                upload_pack_md5: ""
             }
         },
         mounted() {
             this.updateAppVersion()
             this.updateAppStatus()
+            this.reloadUpdateFileInfo()
         },
         methods: {
+            updateConfirm: function () {
+                this.updating = true
+                updateConfirm().then(resp => {
+                    this.updating = false
+                })
+            },
+            reloadUpdateFileInfo: function () {
+                updateFileInfo().then(resp => {
+                    if (resp.data.msg === 'ok') {
+                        this.upload_pack_md5 = resp.data.info.md5
+                    }
+                })
+            },
             restartAppFFFF: function (row_index, app_name) {
                 let message = `全部服务重启完成`
                 if (row_index !== undefined) {

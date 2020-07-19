@@ -11,11 +11,8 @@
     - [x] 自动捕获视频文件的media info `mediainfo`
 - [x] 最终产出
     - 在海胆pt站创建种子条目
-
-## 技术优化
-
-- [ ] Docker内服务使用supervisor托管
-- [ ] 容器内代码更新功能，避免发布新版本后，需要使用新镜像重建容器
+- [x] Docker内服务使用supervisor托管
+- [x] 容器内代码更新功能，避免发布新版本后，需要使用新镜像重建容器
 
 ## 依赖
 - python3.8
@@ -24,3 +21,14 @@
 
 ## 使用
 [docker hub](https://hub.docker.com/r/blllicn/ptools)
+
+
+## 技术实现
+Docker内服务使用supervisor托管
+
+- /var/web/ptools
+  - app
+  - app.backup
+  - db 
+  - log
+- /medias

@@ -9,7 +9,7 @@ RUN echo \
     deb https://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free\
     > /etc/apt/sources.list
 
-RUN apt-get update && apt-get -y install ffmpeg mediainfo supervisor
+RUN apt-get update && apt-get -y install ffmpeg mediainfo supervisor nginx
 
 COPY requirements.txt /requirements.txt
 

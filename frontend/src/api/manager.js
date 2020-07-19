@@ -1,5 +1,4 @@
 export function getAppStatus() {
-    console.log(111)
     return window.axios({
         url: `manager/app/status`,
         method: 'get',
@@ -7,7 +6,6 @@ export function getAppStatus() {
 }
 
 export function getAppVersion() {
-    console.log(111)
     return window.axios({
         url: `manager/app/version`,
         method: 'get',
@@ -24,3 +22,18 @@ export function restartApp(appName) {
         method: 'get',
     })
 }
+
+export function updateFileInfo() {
+    return window.axios({
+        url: `manager/update/check`,
+        method: 'get',
+    })
+}
+
+export function updateConfirm() {
+    return window.axios({
+        url: `manager/update/confirm`,
+        method: 'get',
+    })
+}
+

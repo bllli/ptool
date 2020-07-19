@@ -144,3 +144,4 @@ cython_debug/
 tmp/
 uploads/
 venv2/
+dist

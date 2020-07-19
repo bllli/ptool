@@ -59,11 +59,11 @@
     <!-- Main component for a primary marketing message or call to action -->
     <div class="jumbotron">
         <h1>{{ title }}</h1>
-        <p>可以在这里</p>
-        <p>1. 查看当前版本、服务启动状态</p>
-        <p>2. 拉取最新代码、重启服务</p>
-        {#        <p>3. 提交异常报告</p>#}
-    </div>
+        <p> - 查看当前版本</p>
+        <p> - 查看服务状态</p>
+        <p> - 拉取最新代码</p>
+        <p> - 重新启动服务</p>
+m   </div>
     <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">当前代码版本</h3>
@@ -74,28 +74,55 @@
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">
+            <h3 class="panel-title">升级</h3>
+        </div>
+        <div class="panel-body">
+            <!-- 1.url 选择 -->
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="true">
+                    选择一个
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Another action</a></li>
+                    <li><a href="#">Something else here</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><a href="#">Separated link</a></li>
+                </ul>
+            </div>
+            <!-- todo 2.url 输入 -->
+            <!-- todo 3.zip文件上传 -->
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
             <h3 class="panel-title">服务启动状态</h3>
         </div>
         <div class="panel-body">
-            <table class="table .table-condensed">
-                <thead>
-                <tr>
-                    <th scope="col">服务</th>
-                    <th scope="col">状态信息</th>
-                    <th scope="col">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for key, value in check_info.items %}
+            {% if system_check_info_err %}
+                <p><span class="label label-danger">获取失败</span>{{ system_check_info_err }}</p>
+            {% else %}
+                <table class="table .table-condensed">
+                    <thead>
                     <tr>
-                        <th scope="row">{{ key }}</th>
-                        <td>{{ value }}</td>
-                        <td>操作</td>
+                        <th scope="col">服务</th>
+                        <th scope="col">状态信息</th>
+                        <th scope="col">操作</th>
                     </tr>
-                {% endfor %}
-
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for key, value in check_info.items %}
+                        <tr>
+                            <th scope="row">{{ key }}</th>
+                            <td>{{ value }}</td>
+                            <td>操作</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
         </div>
     </div>
 </div> <!-- /container -->

@@ -143,3 +143,5 @@ cython_debug/
 /db/db.sqlite3
 /.idea
 /venv2/
+/frontend/node_modules/
+/dist/
