@@ -1,3 +1,4 @@
 #!/bin/sh
-python /app/manage.py migrate --noinput && \
-python /app/manage.py initadmin
+python3 manage.py migrate --noinput
+python3 manage.py initadmin
+python3 manage.py collectstatic

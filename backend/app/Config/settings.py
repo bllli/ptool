@@ -127,7 +127,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/tmp/static/'
+STATIC_ROOT = '/var/web/ptools/static/'
 
 SMMS_TOKEN = os.environ.get('SMMS_TOKEN', None)
 THUMBSNAP_TOKEN = os.environ.get('THUMBSNAP_TOKEN', None)

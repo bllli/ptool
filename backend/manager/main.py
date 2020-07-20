@@ -1,20 +1,19 @@
-import os
-import sys
 import hashlib
+import os
 import time
 
 from django import forms
-from django.http import JsonResponse
-from django.urls import include, path
-from django.shortcuts import render
 from django.core.wsgi import get_wsgi_application
-from utils.status import check_info, restart_app
+from django.http import JsonResponse
+from django.urls import path
 
+from utils.status import check_info, restart_app
 from utils.version import read_version
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", __name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = '__secret_key__do__not__matter'
+AUTH_TOKEN = os.environ.get('MANAGER_AUTH_TOKEN')
 ALLOWED_HOSTS = ['*']
 
 ROOT_URLCONF = __name__
@@ -23,22 +22,29 @@ TEMPLATES = [{
     'DIRS': [os.path.join(BASE_DIR, 'templates')]
 }]
 
-# CORS_ORIGIN_ALLOW_ALL = True
-# INSTALLED_APPS = [
-#     'corsheaders',
-# ]
+
+def check_token(get_response):
+    def middleware(request):
+        # if request.headers.get('token') != AUTH_TOKEN:
+        #     resp = JsonResponse({'msg': '没有登陆'})
+        #     resp.status_code = 403
+        #     return resp
+        response = get_response(request)
+        return response
+    return middleware
+
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    '__main__.check_token',
     'django.middleware.common.CommonMiddleware',
 ]
 
 if os.environ.get('env') == 'docker':
-    APP_VERSION_FILE = '/app/VERSION'
     DEBUG = False
 else:
     DEBUG = True
-    APP_VERSION_FILE = '../app/VERSION'
+
+APP_VERSION_FILE = '/var/web/ptools/app/app/VERSION'
 
 
 def app_version(request):
@@ -68,6 +74,8 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
+update_file_path = '/var/web/ptools/update.zip'
+
 update_file_info = {
     'md5': '',
     'updating': False,
@@ -76,12 +84,12 @@ update_file_info = {
 
 
 def read_update_file_in_service():
-    if not os.path.isfile('/tmp/ptools/update.zip'):
+    if not os.path.isfile(update_file_path):
         return
     global update_file_info
     update_file_info['md5'] = ''
     hash_md5 = hashlib.md5()
-    with open('/tmp/ptools/update.zip', 'rb') as f:
+    with open(update_file_path, 'rb') as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
         update_file_info['md5'] = hash_md5.hexdigest()
@@ -91,7 +99,7 @@ def handle_uploaded_file(f):
     global update_file_info
     update_file_info['md5'] = ''
     hash_md5 = hashlib.md5()
-    with open('/tmp/ptools/update.zip', 'wb') as destination:
+    with open(update_file_path, 'wb') as destination:
         for chunk in iter(lambda: f.read(4096), b""):
             destination.write(chunk)
             hash_md5.update(chunk)
@@ -108,7 +116,7 @@ def app_upload_update_file(request):
 
 
 def app_get_update_file_info(request):
-    if not os.path.isfile('/tmp/ptools/update.zip'):
+    if not os.path.isfile(update_file_path):
         return JsonResponse({'msg': '文件不存在，请重新上传'})
     return JsonResponse({'msg': 'ok', 'info': update_file_info})
 
@@ -123,8 +131,6 @@ def app_update_confirm(request):
 
 
 def app_restart(request):
-    time.sleep(3)
-    return JsonResponse({'status': 'ok'})
     process = request.GET.get('process')
     restart_app(process)
     return JsonResponse({'status': 'ok'})
@@ -147,10 +153,10 @@ if DEBUG:
     from django.core.management import execute_from_command_line
 
     # execute_from_command_line(sys.argv)
-    execute_from_command_line(['main.py', 'runserver', '0.0.0.0:8001'])
+    execute_from_command_line(['main.py', 'runserver', '0.0.0.0:8002'])
 else:
     import netius.servers
 
     application = get_wsgi_application()
     server = netius.servers.WSGIServer(app=application)
-    server.serve(port=8001)
+    server.serve(port=8002)
