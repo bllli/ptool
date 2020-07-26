@@ -10,7 +10,7 @@ rm -rf dist && mkdir dist
 mv ./frontend/dist dist/frontend
 cp -r ./backend/app dist/app
 find dist/app -name '*.pyc' -delete
-cp -r ./nginx/ dist/nginx
+#cp -r ./nginx/ dist/nginx
 cp -r ./supervisor/ dist/supervisor
 cp ./requirements.txt dist/requirements.txt
 cp ./scripts/install.sh dist/install.sh

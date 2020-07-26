@@ -16,14 +16,16 @@ COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
     && rm -rf ~/.cache
 
-RUN cmkdir -p /var/web/ptools && cd /var/web/ptools && mkdir -p db log supervisor &&
+RUN mkdir -p /var/web/ptools && cd /var/web/ptools && mkdir -p db log supervisor app
 
 COPY ./supervisor /var/web/ptools/supervisor
-ADD ./nginx/nginx.conf /var/web/ptools/nginx.conf
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
 ENV env docker
 
-COPY ./app /app
+COPY ./backend/app /var/web/ptools/app/app
+COPY ./frontend/dist /var/web/ptools/app/frontend
+COPY ./backend/manager /var/web/ptools/manager
 
 CMD ["/usr/bin/supervisord", "-c", "/var/web/ptools/supervisor/supervisord.conf"]
 # /usr/bin/supervisord -c /var/web/ptools/supervisor/supervisord.conf

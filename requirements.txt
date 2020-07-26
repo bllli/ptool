@@ -32,3 +32,4 @@ zipp==3.1.0
 
 pip~=20.1.1
 setuptools~=47.1.1
+netius==1.17.58
