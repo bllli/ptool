@@ -23,6 +23,8 @@ COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
 ENV env docker
 
+RUN apt-get -y install unzip
+
 COPY ./backend/app /var/web/ptools/app/app
 COPY ./frontend/dist /var/web/ptools/app/frontend
 COPY ./backend/manager /var/web/ptools/manager

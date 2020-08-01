@@ -1,13 +1,15 @@
 import hashlib
 import os
+import subprocess
 import time
 
 from django import forms
 from django.core.wsgi import get_wsgi_application
 from django.http import JsonResponse
 from django.urls import path
+from subprocess import Popen, PIPE
 
-from utils.status import check_info, restart_app
+from utils.status import check_info, ctrl_app
 from utils.version import read_version
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", __name__)
@@ -39,10 +41,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 ]
 
-if os.environ.get('env') == 'docker':
-    DEBUG = False
-else:
-    DEBUG = True
+DEBUG = True
 
 APP_VERSION_FILE = '/var/web/ptools/app/app/VERSION'
 
@@ -122,17 +121,25 @@ def app_get_update_file_info(request):
 
 
 def app_update_confirm(request):
-    global update_file_info
-    if update_file_info['updating']:
-        return JsonResponse({'status': '正在更新 请稍后'})
-    update_file_info['updating'] = True
     # 停服务 删除以前的文件 新文件覆盖 迁移脚本 启动服务
-    return JsonResponse({'msg': 'ok'})
+    try:
+        ctrl_app(func='stop')
+        unzip = Popen('unzip /var/web/ptools/update.zip -d /var/web/ptools/', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out = unzip.communicate()
+        unzip_out = '\n'.join(map(lambda x: x.decode('utf-8'), out))
+        install_sh = Popen('sh /var/web/ptools/dist/install.sh', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out = install_sh.communicate()
+        install_sh_out = '\n'.join(map(lambda x: x.decode('utf-8'), out))
+        ctrl_app(func='start')
+    except Exception as e:
+        import traceback
+        return JsonResponse({'msg': 'err', 'trace': traceback.format_exc()})
+    return JsonResponse({'msg': 'ok', 'unzip_out': unzip_out, 'install_sh_out': install_sh_out})
 
 
 def app_restart(request):
     process = request.GET.get('process')
-    restart_app(process)
+    ctrl_app(process, 'restart')
     return JsonResponse({'status': 'ok'})
 
 
@@ -149,7 +156,7 @@ urlpatterns = [
 read_update_file_in_service()
 
 
-if DEBUG:
+if True:
     from django.core.management import execute_from_command_line
 
     # execute_from_command_line(sys.argv)

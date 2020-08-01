@@ -83,7 +83,7 @@
                 <el-upload
                         class="upload-demo"
                         drag
-                        action="http://127.0.0.1:8080/manager/update/upload"
+                        action="manager/update/upload"
                         :show-file-list=false
                         accept="application/zip"
                         :on-success="reloadUpdateFileInfo"

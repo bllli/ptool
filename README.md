@@ -28,7 +28,10 @@ Docker内服务使用supervisor托管
 
 - /var/web/ptools
   - app
-  - app.backup
+    - app
+      - uploads # 软链接/uploads
+  - app_backup
+  - manager
   - db 
   - log
-- /medias
+- /uploads
