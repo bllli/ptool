@@ -1,13 +1,13 @@
 <template>
     <div id="app">
-        <h1>做种🐔管理工具</h1>
+        <h1>发种🐔管理工具</h1>
         <h3>看明白再操作啊</h3>
         <el-card class="box-card">
             <div slot="header" class="clearfix">
                 <span>版本信息 Version</span>
                 <el-button style="float: right; padding: 3px 0" type="text" v-on:click="updateAppVersion">刷新</el-button>
             </div>
-            <div>
+            <div style="white-space: pre-wrap">
                 {{ version }}
             </div>
         </el-card>

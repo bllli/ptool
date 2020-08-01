@@ -1,3 +1,16 @@
-V0.22
+V0.23
 ---
-修改了一些bug，还杀了一个程序员祭天
+抢抢抢先预览版
+
+支持安装包更新方式
+
+警告:
+1. 创建容器时，媒体文件夹一定要指定readonly只读属性，不要给任何人任何删除/破坏你们数据的机会
+2. 更新版本时，请确认你的安装包来自官方途径。不然等同于请贼入室。如果你的媒体文件夹指定了只读属性，那么最坏结果就是重建容器；否则有可能丢失所有数据
+3. 没看懂已上两条，不要安装本版本
+
+docker run --restart always -d -p 8002:8000 --name ptools \
+   -v ~/ptools/db:/var/web/ptools/db \
+   -v ~/ptools/log:/var/web/ptools/log \
+   -v ~/Downloads:/uploads/downloads:ro \
+ ptools
