@@ -45,6 +45,9 @@ class HaiDanClient:
             "audiocodec_sel": (None, task_m.audiocodec),
             "standard_sel": (None, task_m.standard),
             "team_suffix": (None, task_m.team_suffix),
+            "season": (None, task_m.season),
+            "episode": (None, task_m.episode),
+            "collages": (None, 1 if task_m.collages else 0),
         }
         try:
             c = config.PT_COOKIES

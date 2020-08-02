@@ -43,6 +43,9 @@ class Task(models.Model):
     image_urls = models.TextField('自动生成的图片', null=True, blank=True)
     other_bbcode = models.TextField('其他信息 格式为bbcode', null=True, blank=True)
     type = models.IntegerField('种子类型', choices=Type.choices, null=True, blank=False, default=401)
+    season = models.IntegerField('第几季 0表示不区分季', null=True, blank=True)
+    episode = models.CharField('第几集 0表示全集', null=False, blank=True, default='', max_length=100)
+    collages = models.BooleanField('多季剧集/电影合集', null=True, default=False)
 
     medium = models.IntegerField('媒介', choices=[
         (1, 'Blu-ray'),
@@ -64,10 +67,9 @@ class Task(models.Model):
         (3, 'Xvid'),
         (4, 'MPEG-2'),
         (5, 'Other'),
-        (10, 'HEVC'),
-        (11, 'x265'),
-        (12, 'x264'),
-    ], null=True, blank=True, default=12)
+        (11, 'H.265/HEVC/X265'),
+        (13, 'MPEG-4/XviD/DivX'),
+    ], null=True, blank=True, default=11)
 
     audiocodec = models.IntegerField('音频编码', choices=[
         (1, 'FLAC'),

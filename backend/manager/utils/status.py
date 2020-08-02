@@ -22,8 +22,8 @@ def ctrl_app(process=None, func='start'):
         elif func == 'stop':
             client.supervisor.stopProcess(process)
         else:
-            client.supervisor.startProcess(process)
             client.supervisor.stopProcess(process)
+            client.supervisor.startProcess(process)
 
 
 if __name__ == '__main__':

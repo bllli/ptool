@@ -139,7 +139,7 @@ def app_update_confirm(request):
 
 def app_restart(request):
     process = request.GET.get('process')
-    ctrl_app(process, 'restart')
+    ctrl_app(process, func='restart')
     return JsonResponse({'status': 'ok'})
 
 

@@ -39,7 +39,7 @@ def generate_torrent_file(task_id):
     t.created_by = text
     file_paths = []
     for path_m in task.path.all():
-        file_paths.append(path_m.path.path)
+        file_paths.append('/media/' + path_m.path.path)
     t.filepaths = file_paths
     # t.name = task.title
     t.generate()
