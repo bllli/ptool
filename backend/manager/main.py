@@ -5,7 +5,7 @@ import time
 
 from django import forms
 from django.core.wsgi import get_wsgi_application
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.urls import path
 from subprocess import Popen, PIPE
 
@@ -143,6 +143,23 @@ def app_restart(request):
     return JsonResponse({'status': 'ok'})
 
 
+def dump_log_zip_file(request):
+    try:
+        cmd = 'rm -f /var/web/ptools/logfile.zip && ' \
+              'zip -r /var/web/ptools/logfile.zip /var/web/ptools/db /var/web/ptools/log'
+        cmd = Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out = cmd.communicate()
+        cmd_out = '\n'.join(map(lambda x: x.decode('utf-8'), out))
+        file = open('/var/web/ptools/logfile.zip', 'rb')
+        response = HttpResponse(file)
+        response['Content-Type'] = 'application/octet-stream'  # 设置头信息，告诉浏览器这是个文件
+        response['Content-Disposition'] = 'attachment;filename="logs.zip"'
+    except Exception as e:
+        import traceback
+        return JsonResponse({'msg': 'err', 'trace': traceback.format_exc()})
+    return response
+
+
 urlpatterns = [
     # path('', home),
     path('manager/app/version', app_version),
@@ -151,12 +168,13 @@ urlpatterns = [
     path('manager/update/upload', app_upload_update_file),
     path('manager/update/check', app_get_update_file_info),
     path('manager/update/confirm', app_update_confirm),
+    path('manager/dump/log', dump_log_zip_file),
 ]
 
 read_update_file_in_service()
 
 
-if True:
+if DEBUG:
     from django.core.management import execute_from_command_line
 
     # execute_from_command_line(sys.argv)
